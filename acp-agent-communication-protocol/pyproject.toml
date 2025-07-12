@@ -1,0 +1,11 @@
+[project]
+name = "acp-agent-communication-protocol"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "crewai>=0.141.0",
+    "crewai-tools>=0.51.1",
+    "ipykernel>=6.29.5",
+]
