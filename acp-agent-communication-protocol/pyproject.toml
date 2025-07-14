@@ -14,4 +14,7 @@ dependencies = [
     "openinference-instrumentation-crewai>=0.1.10",
     "openinference-instrumentation-litellm>=0.1.23",
     "acp-sdk>=1.0.0",
+    "smolagents[mcp,toolkit]>=1.20.0",
+    "fastacp>=0.0.0",
+    "mcp[cli]>=1.11.0",
 ]
