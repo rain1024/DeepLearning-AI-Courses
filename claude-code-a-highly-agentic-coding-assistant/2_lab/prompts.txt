@@ -1,0 +1,31 @@
+give me an overview of the codebase
+
+===
+
+how are these documents processed
+
+===
+
+trace the process of handling a user's query from frontend to backend
+
+===
+
+draw a diagram that illustrates this flow
+
+===
+
+/init
+
+===
+
+/ide
+
+===
+
+Add to memory (# to memorize)
+
+# Always use uv to run the server, do not use pip directly
+
+===
+
+# Make sure to use uv to manage all dependencies
