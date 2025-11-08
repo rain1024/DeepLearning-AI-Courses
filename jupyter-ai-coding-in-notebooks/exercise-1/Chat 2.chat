@@ -1,0 +1,60 @@
+{
+  "messages": [
+    {
+      "raw_time": false,
+      "id": "535c179c-714c-4709-afc7-ef758a5363bc",
+      "type": "msg",
+      "body": "Create a code cell that uses OpenAI\u2019s gpt-4.1-mini model to write a fun cookie fortune message for the user. The program should first ask the user to input their name, then generate the message and print it out.\n\nTo call gpt-4.1-mini, use python-dotenv to load the secret OPENAI_API_KEY from .env. Then, use this prompt to call the model:\n\n\"\"\"Write a brief and humorous cookie fortune message for {name} (1 sentence).\"\"\"",
+      "time": 1762572395.6068764,
+      "attachments": [
+        "51559945-fbfc-496d-b095-55b433c79a73"
+      ],
+      "sender": "516dc7d40a674362a8ae6e0d91471a4e"
+    },
+    {
+      "raw_time": false,
+      "mentions": [],
+      "time": 1762572396.7361689,
+      "body": "Here\u2019s the complete code cell that performs your requested task using **OpenAI\u2019s `gpt-4.1-mini` model** and `python-dotenv` to load your API key:  \n\n```python\n# Import required packages\nfrom openai import OpenAI\nfrom dotenv import load_dotenv\nimport os\n\n# Load environment variables from .env file\nload_dotenv()\n\n# Initialize OpenAI client\nclient = OpenAI(api_key=os.getenv(\"OPENAI_API_KEY\"))\n\n# Ask the user for their name\nname = input(\"Enter your name: \")\n\n# Define the prompt\nprompt = f\"Write a brief and humorous cookie fortune message for {name} (1 sentence).\"\n\n# Generate the cookie fortune message\nresponse = client.chat.completions.create(\n    model=\"gpt-4.1-mini\",\n    messages=[\n        {\"role\": \"user\", \"content\": prompt}\n    ]\n)\n\n# Extract and print the message\nfortune = response.choices[0].message.content.strip()\nprint(\"\\n\ud83c\udf6a Your Cookie Fortune \ud83c\udf6a\")\nprint(fortune)\n```\n\n**How it works:**\n1. Loads your API key using `python-dotenv`.\n2. Prompts the user for their name.\n3. Sends a custom prompt to the `gpt-4.1-mini` model.\n4. Prints out a short, humorous cookie fortune message.",
+      "id": "18278dd1-7d89-49d0-a165-5c6f3be0d361",
+      "sender": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "type": "msg"
+    }
+  ],
+  "users": {
+    "jupyter-ai-personas::jupyter_ai::JupyternautPersona": {
+      "display_name": "Jupyternaut",
+      "initials": null,
+      "username": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "avatar_url": "/api/ai/static/jupyternaut.svg",
+      "color": null,
+      "bot": true,
+      "name": "Jupyternaut"
+    },
+    "516dc7d40a674362a8ae6e0d91471a4e": {
+      "avatar_url": null,
+      "username": "516dc7d40a674362a8ae6e0d91471a4e",
+      "display_name": "Anonymous Io",
+      "initials": "AI",
+      "name": "Anonymous Io",
+      "bot": false,
+      "mention_name": "Anonymous-Io",
+      "color": "var(--jp-collaborator-color3)"
+    }
+  },
+  "attachments": {
+    "51559945-fbfc-496d-b095-55b433c79a73": {
+      "cells": [
+        {
+          "id": "45d53822-0348-458c-b14a-0778f063020e",
+          "input_type": "code"
+        }
+      ],
+      "type": "notebook",
+      "value": "L1 - Coding with Jupyter AI.ipynb"
+    }
+  },
+  "metadata": {
+    "id": "78d65dbe-b539-418b-b51d-8a50ac1a6df5"
+  }
+}

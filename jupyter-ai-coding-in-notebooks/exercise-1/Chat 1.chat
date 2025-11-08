@@ -1,0 +1,60 @@
+{
+  "messages": [
+    {
+      "id": "d34665a4-f0b5-4cc1-b7fb-caa1b60d527f",
+      "raw_time": false,
+      "attachments": [
+        "edca8b71-335b-43cd-b747-a0e7655c8728"
+      ],
+      "sender": "516dc7d40a674362a8ae6e0d91471a4e",
+      "body": "Write a code cell to print Hello World",
+      "time": 1762572361.6114302,
+      "type": "msg"
+    },
+    {
+      "sender": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "type": "msg",
+      "mentions": [],
+      "id": "be0647f6-ce5d-4031-8e74-d2d8fde1c3b1",
+      "time": 1762572362.4131439,
+      "raw_time": false,
+      "body": "Here\u2019s a Python code cell that prints **Hello World**:  \n\n```python\nprint(\"Hello World\")\n```"
+    }
+  ],
+  "users": {
+    "jupyter-ai-personas::jupyter_ai::JupyternautPersona": {
+      "username": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "initials": null,
+      "bot": true,
+      "name": "Jupyternaut",
+      "display_name": "Jupyternaut",
+      "avatar_url": "/api/ai/static/jupyternaut.svg",
+      "color": null
+    },
+    "516dc7d40a674362a8ae6e0d91471a4e": {
+      "initials": "AI",
+      "username": "516dc7d40a674362a8ae6e0d91471a4e",
+      "mention_name": "Anonymous-Io",
+      "avatar_url": null,
+      "bot": false,
+      "name": "Anonymous Io",
+      "display_name": "Anonymous Io",
+      "color": "var(--jp-collaborator-color3)"
+    }
+  },
+  "attachments": {
+    "edca8b71-335b-43cd-b747-a0e7655c8728": {
+      "cells": [
+        {
+          "input_type": "code",
+          "id": "9129d91c-6b42-40bc-ae40-606a2187366c"
+        }
+      ],
+      "type": "notebook",
+      "value": "L1 - Coding with Jupyter AI.ipynb"
+    }
+  },
+  "metadata": {
+    "id": "89b2da91-767c-4621-8b0f-7c13f6864a71"
+  }
+}

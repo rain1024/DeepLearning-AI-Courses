@@ -1,0 +1,60 @@
+{
+  "messages": [
+    {
+      "type": "msg",
+      "id": "b5887faa-1964-4f0a-b8b9-4dc2028cc12d",
+      "body": "What does this code cell do? (starting with creating sentiment_category column)",
+      "time": 1762572486.3388615,
+      "sender": "516dc7d40a674362a8ae6e0d91471a4e",
+      "raw_time": false,
+      "attachments": [
+        "0e296f8d-1f32-4dee-901c-1167e7d628a3"
+      ]
+    },
+    {
+      "sender": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "id": "c2df3220-e2de-4dc6-a25d-90b97a394bb1",
+      "time": 1762572486.8194342,
+      "type": "msg",
+      "mentions": [],
+      "raw_time": false,
+      "body": "This code cell performs **sentiment-based analysis of customer reviews** from a Pandas DataFrame named `df`. Here's a step-by-step explanation of what each section does:\n\n---\n\n### **1. Create Sentiment Categories**\n```python\ndf['sentiment_category'] = pd.cut(\n    df['rating'],\n    bins=[0, 2, 3, 5],\n    labels=['Negative', 'Neutral', 'Positive']\n)\n```\n- The code creates a new column `sentiment_category` based on the numeric `rating` column.\n- `pd.cut()` divides the rating range into **bins**:\n  - Ratings **0\u20132** \u2192 `'Negative'`\n  - Ratings **2\u20133** \u2192 `'Neutral'`\n  - Ratings **3\u20135** \u2192 `'Positive'`\n- Each review is thus categorized by sentiment.\n\n---\n\n### **2. Group and Aggregate by Product and Sentiment**\n```python\nanalysis = (\n    df.groupby(['product_category', 'sentiment_category'])\n      .agg(\n          rating_count=('rating', 'count'),\n          product_id_nunique=('product_id', 'nunique')\n      )\n      .reset_index()\n)\n```\n- Groups the data by **`product_category`** and **`sentiment_category`**.\n- Calculates:\n  - `rating_count`: number of reviews in each sentiment group.\n  - `product_id_nunique`: number of unique products with reviews in that group.\n- Produces a summarized table (`analysis`) combining these metrics.\n\n---\n\n### **3. Handle Missing Data**\n```python\nanalysis = analysis.fillna({\n    'rating_count': 0,\n    'product_id_nunique': 0\n})\n```\n- Ensures that if a group has no data (e.g. no negative reviews for a category), the missing values are replaced with zero.\n\n---\n\n### **4. Calculate % of Negative Reviews**\n```python\ncategory_counts = df.groupby('product_category').size()\nnegative_counts = (\n    df[df['sentiment_category'] == 'Negative']\n    .groupby('product_category')\n    .size()\n)\nnegative_pct = (negative_counts / category_counts * 100).fillna(0)\n```\n- Counts total reviews per product category.\n- Counts only the negative reviews per category.\n- Calculates the **percentage of negative reviews** for each category.\n\n---\n\n### **5. Display Results**\n```python\nprint(\"Review analysis by category and sentiment:\")\nprint(analysis)\nprint(\"\\nPercentage of negative reviews by category:\")\nprint(negative_pct.round(1))\n```\n- Prints two outputs:\n  - The **sentiment breakdown** for each product category.\n  - The **percentage of negative reviews** (rounded to 1 decimal).\n\n---\n\n### \u2705 **Summary**\nThis code:\n1. Classifies each review into **negative**, **neutral**, or **positive**.\n2. Summarizes review counts per product category and sentiment.\n3. Computes the **proportion of negative reviews** for each product category.\n4. Outputs both a detailed sentiment table and a negative review percentage overview.\n\nIn short, it helps identify which product categories have higher negativity in customer feedback."
+    }
+  ],
+  "users": {
+    "jupyter-ai-personas::jupyter_ai::JupyternautPersona": {
+      "username": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "initials": null,
+      "avatar_url": "/api/ai/static/jupyternaut.svg",
+      "color": null,
+      "name": "Jupyternaut",
+      "display_name": "Jupyternaut",
+      "bot": true
+    },
+    "516dc7d40a674362a8ae6e0d91471a4e": {
+      "avatar_url": null,
+      "mention_name": "Anonymous-Io",
+      "color": "var(--jp-collaborator-color3)",
+      "bot": false,
+      "name": "Anonymous Io",
+      "initials": "AI",
+      "display_name": "Anonymous Io",
+      "username": "516dc7d40a674362a8ae6e0d91471a4e"
+    }
+  },
+  "attachments": {
+    "0e296f8d-1f32-4dee-901c-1167e7d628a3": {
+      "type": "notebook",
+      "value": "L1 - Coding with Jupyter AI.ipynb",
+      "cells": [
+        {
+          "id": "347efcf1-09d8-4bc8-a08f-7f246a39f2fb",
+          "input_type": "code"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "id": "efcad0be-0148-419e-a82c-1689af60460f"
+  }
+}

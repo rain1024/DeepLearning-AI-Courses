@@ -1,0 +1,46 @@
+{
+  "messages": [
+    {
+      "raw_time": false,
+      "type": "msg",
+      "sender": "516dc7d40a674362a8ae6e0d91471a4e",
+      "id": "dde53d6b-1393-44be-b00a-8129e2bfae33",
+      "time": 1762572567.8328779,
+      "body": "Follow the instructions in the Markdown cell to generate code (3 notebook cells) to analyze the data.\n\nCreate code that extracts reviews from a Pandas DataFrame and summarizes the issues reported by customers. Create a code cell for each step:\n\nStep 1: Extract the reviews in a list\n\nThe reviews are saved in the column review_text of the DataFrame df. Extract all reviews in a list combined_reviews.\n\nStep 2: Examine the reviews\n\nUse OpenAI\u2019s gpt-4.1-mini model to summarize the content in the reviews. The goal is to output a summary of product and service issues. To call gpt, assume the OPENAI_API_KEY is defined in .env, and use python-dotenv to load it. Use this prompt:\n\n\"\"\" You are analyzing customer reviews to identify product and service issues.\n\nBelow are customer reviews for a set of products. Please analyze them and provide:\n\nCommon Product Issues: List the main problems customers reported about the product itself (quality, functionality, features, etc.)\nCommon Service Issues: List the main problems customers reported about the service (shipping, customer support, packaging, etc.)\nFrequency: For each issue, estimate how often it appears (e.g., \"mentioned frequently\", \"occasional complaint\", \"rare issue\")\nFormat your response clearly with headers and bullet points.\n\nCUSTOMER REVIEWS: {combined_reviews}\n\n\"\"\"\n\nStep 3: Print & Save the summary\n\nPrint the summary and save it as a markdown file customer_reviews.md"
+    },
+    {
+      "time": 1762572568.257839,
+      "sender": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "type": "msg",
+      "body": "Here are the three notebook code cells you can create to analyze the customer reviews as described.\n\n---\n\n### **Step 1: Extract the reviews in a list**\n```python\n# Step 1: Extract reviews from the DataFrame\n\n# Assuming your DataFrame is named df and has a column 'review_text'\ncombined_reviews = df['review_text'].dropna().tolist()\n\n# Preview the first few reviews\ncombined_reviews[:5]\n```\n\n---\n\n### **Step 2: Summarize the issues with OpenAI\u2019s GPT model**\n```python\n# Step 2: Use OpenAI API to summarize reviews\n\nimport os\nfrom dotenv import load_dotenv\nfrom openai import OpenAI\n\n# Load the API key\nload_dotenv()\nclient = OpenAI(api_key=os.getenv(\"OPENAI_API_KEY\"))\n\n# Define the analysis prompt\nprompt = f\"\"\"\nYou are analyzing customer reviews to identify product and service issues.\n\nBelow are customer reviews for a set of products. Please analyze them and provide:\n\nCommon Product Issues: List the main problems customers reported about the product itself (quality, functionality, features, etc.)\nCommon Service Issues: List the main problems customers reported about the service (shipping, customer support, packaging, etc.)\nFrequency: For each issue, estimate how often it appears (e.g., \"mentioned frequently\", \"occasional complaint\", \"rare issue\")\nFormat your response clearly with headers and bullet points.\n\nCUSTOMER REVIEWS: {combined_reviews}\n\"\"\"\n\n# Call OpenAI\u2019s gpt-4.1-mini model\nresponse = client.chat.completions.create(\n    model=\"gpt-4.1-mini\",\n    messages=[\n        {\"role\": \"system\", \"content\": \"You are a helpful data analyst.\"},\n        {\"role\": \"user\", \"content\": prompt}\n    ]\n)\n\n# Extract the summary text\nsummary = response.choices[0].message.content\n```\n\n---\n\n### **Step 3: Print and save the summary**\n```python\n# Step 3: Print and save the summary\n\n# Print the model-generated summary\nprint(summary)\n\n# Save the summary as a Markdown file\nwith open(\"customer_reviews.md\", \"w\", encoding=\"utf-8\") as f:\n    f.write(summary)\n```\n\n---\n\nThese cells will extract, analyze, and document customer feedback, producing a clean summary of common issues in a Markdown report.",
+      "mentions": [],
+      "id": "f224641c-047d-4bdf-92a8-a347b364a531",
+      "raw_time": false
+    }
+  ],
+  "users": {
+    "jupyter-ai-personas::jupyter_ai::JupyternautPersona": {
+      "initials": null,
+      "avatar_url": "/api/ai/static/jupyternaut.svg",
+      "username": "jupyter-ai-personas::jupyter_ai::JupyternautPersona",
+      "name": "Jupyternaut",
+      "color": null,
+      "bot": true,
+      "display_name": "Jupyternaut"
+    },
+    "516dc7d40a674362a8ae6e0d91471a4e": {
+      "color": "var(--jp-collaborator-color3)",
+      "name": "Anonymous Io",
+      "username": "516dc7d40a674362a8ae6e0d91471a4e",
+      "bot": false,
+      "display_name": "Anonymous Io",
+      "avatar_url": null,
+      "initials": "AI",
+      "mention_name": "Anonymous-Io"
+    }
+  },
+  "attachments": {},
+  "metadata": {
+    "id": "4701c476-1796-438c-9a4f-b191b84e8782"
+  }
+}
