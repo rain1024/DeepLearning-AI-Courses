@@ -8,3 +8,7 @@ This repository contains course materials, exercises, and projects from various 
 * [Agentic AI](agentic-ai/)
 * [Claude Code: A Highly Agentic Coding Assistant](claude-code-a-highly-agentic-coding-assistant/)
 * [Jupyter AI: AI Coding in Notebooks](jupyter-ai-coding-in-notebooks/)
+
+## Professional Certificate
+
+Mathematics for Machine Learning and Data Science
