@@ -11,4 +11,4 @@ This repository contains course materials, exercises, and projects from various 
 
 ## Professional Certificate
 
-Mathematics for Machine Learning and Data Science
+* [Mathematics for Machine Learning and Data Science](https://learn.deeplearning.ai/specializations/mathematics-for-machine-learning-and-data-science/overview)
