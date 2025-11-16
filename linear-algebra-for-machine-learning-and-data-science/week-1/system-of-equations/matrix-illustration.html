@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Transformation Visualization</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 10px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #1e3c72;
+            background: white;
+            color: #1e3c72;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: #e3f2fd;
+        }
+
+        .matrix-input {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .matrix-input.mode-2d {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .matrix-input.mode-3d {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .matrix-input input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .matrix-input input:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 10px rgba(30, 60, 114, 0.3);
+        }
+
+        .matrix-bracket {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .bracket {
+            font-size: 3em;
+            color: #1e3c72;
+            line-height: 0.8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .canvas-container {
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            height: 600px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: default;
+        }
+
+        canvas.draggable {
+            cursor: grab;
+        }
+
+        canvas.dragging {
+            cursor: grabbing;
+        }
+
+        .canvas-hint {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .canvas-hint.show {
+            opacity: 1;
+        }
+
+        .info-panel {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .info-panel h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #90caf9;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            color: #1976d2;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 1.2em;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+
+        .preset-examples {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+
+        .animation-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+        }
+
+        .animation-controls label {
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .animation-controls input[type="range"] {
+            flex: 1;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #333;
+        }
+
+        @media (max-width: 1024px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Matrix Transformation Visualization</h1>
+        <p class="subtitle">Explore how matrices transform space through interactive 2D/3D visualization</p>
+
+        <div class="controls">
+            <!-- Left Panel: Matrix Input -->
+            <div class="control-panel">
+                <h2>Transformation Matrix</h2>
+
+                <div class="mode-selector">
+                    <button class="mode-btn active" onclick="setMode('2d')">2D Mode</button>
+                    <button class="mode-btn" onclick="setMode('3d')">3D Mode</button>
+                </div>
+
+                <div class="matrix-bracket">
+                    <span class="bracket">[</span>
+                    <div class="matrix-input mode-2d" id="matrixInput">
+                        <!-- 2D Matrix (default) -->
+                        <input type="number" id="m11" value="1" step="0.1">
+                        <input type="number" id="m12" value="0" step="0.1">
+                        <input type="number" id="m21" value="0" step="0.1">
+                        <input type="number" id="m22" value="1" step="0.1">
+                    </div>
+                    <span class="bracket">]</span>
+                </div>
+
+                <div id="matrixFormula" class="info-panel">
+                    <h3>Matrix Form</h3>
+                    <div style="text-align: center; font-size: 1.1em;">
+                        $$
+                        T = \begin{bmatrix}
+                        1.0 & 0.0 \\
+                        0.0 & 1.0
+                        \end{bmatrix}
+                        $$
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="transform()">🔄 Transform</button>
+                    <button onclick="reset()" class="danger">↺ Reset</button>
+                    <button onclick="toggleGrid()" class="secondary">⊞ Toggle Grid</button>
+                </div>
+
+                <div class="animation-controls">
+                    <label>Speed:</label>
+                    <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1">
+                    <span id="speedValue">1.0x</span>
+                </div>
+
+                <h3 style="color: #1e3c72; margin-top: 20px; margin-bottom: 10px;">Preset Transformations</h3>
+                <div class="preset-examples">
+                    <button class="preset-btn" onclick="loadPreset('identity')">Identity</button>
+                    <button class="preset-btn" onclick="loadPreset('rotation')">Rotation 45°</button>
+                    <button class="preset-btn" onclick="loadPreset('scale')">Scale 2x</button>
+                    <button class="preset-btn" onclick="loadPreset('shear')">Shear X</button>
+                    <button class="preset-btn" onclick="loadPreset('reflection')">Reflect Y</button>
+                    <button class="preset-btn" onclick="loadPreset('projection')">Projection</button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Info -->
+            <div class="control-panel">
+                <h2>Transformation Properties</h2>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Determinant:</label>
+                        <div class="value" id="detValue">1.00</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Area/Volume Scale:</label>
+                        <div class="value" id="scaleValue">1.00x</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Type:</label>
+                        <div class="value" id="typeValue">Identity</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Invertible:</label>
+                        <div class="value" id="invertibleValue">Yes</div>
+                    </div>
+                </div>
+
+                <div class="info-panel" style="margin-top: 20px;">
+                    <h3>Understanding the Transformation</h3>
+                    <div id="transformDescription" style="line-height: 1.8;">
+                        <p>The <strong>identity matrix</strong> leaves all vectors unchanged.</p>
+                        <p style="margin-top: 10px;">
+                            $$\vec{v}' = T\vec{v} = \vec{v}$$
+                        </p>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(0, 255, 0, 0.3);"></div>
+                        <span>Original Space</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(100, 150, 255, 0.4);"></div>
+                        <span>Transformed Space</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div class="canvas-hint" id="canvasHint">🖱️ Drag to rotate view</div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let canvas, ctx;
+        let mode = '2d'; // '2d' or '3d'
+        let animationSpeed = 1.0;
+        let showGrid = true;
+        let isAnimating = false;
+        let animationProgress = 0;
+        let currentMatrix = [[1, 0], [0, 1]]; // Identity 2x2
+        let targetMatrix = [[1, 0], [0, 1]];
+
+        // 3D rotation angles for visualization
+        let rotationX = 0.5;
+        let rotationY = 0.3;
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        // Initialize
+        window.onload = function() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            // Mouse controls for 3D rotation
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+            canvas.addEventListener('mouseleave', onMouseUp);
+
+            // Speed slider
+            document.getElementById('speedSlider').addEventListener('input', function(e) {
+                animationSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = animationSpeed.toFixed(1) + 'x';
+            });
+
+            draw();
+            updateMatrixDisplay();
+        };
+
+        function setMode(newMode) {
+            if (isAnimating) return;
+
+            mode = newMode;
+
+            // Update UI
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update canvas cursor and hint
+            const canvasHint = document.getElementById('canvasHint');
+            if (mode === '3d') {
+                canvas.classList.add('draggable');
+                canvasHint.classList.add('show');
+                setTimeout(() => canvasHint.classList.remove('show'), 3000); // Hide after 3s
+            } else {
+                canvas.classList.remove('draggable');
+                canvasHint.classList.remove('show');
+            }
+
+            // Update matrix input
+            const matrixInput = document.getElementById('matrixInput');
+            matrixInput.className = 'matrix-input mode-' + mode;
+
+            if (mode === '2d') {
+                matrixInput.innerHTML = `
+                    <input type="number" id="m11" value="1" step="0.1">
+                    <input type="number" id="m12" value="0" step="0.1">
+                    <input type="number" id="m21" value="0" step="0.1">
+                    <input type="number" id="m22" value="1" step="0.1">
+                `;
+                currentMatrix = [[1, 0], [0, 1]];
+                targetMatrix = [[1, 0], [0, 1]];
+            } else {
+                matrixInput.innerHTML = `
+                    <input type="number" id="m11" value="1" step="0.1">
+                    <input type="number" id="m12" value="0" step="0.1">
+                    <input type="number" id="m13" value="0" step="0.1">
+                    <input type="number" id="m21" value="0" step="0.1">
+                    <input type="number" id="m22" value="1" step="0.1">
+                    <input type="number" id="m23" value="0" step="0.1">
+                    <input type="number" id="m31" value="0" step="0.1">
+                    <input type="number" id="m32" value="0" step="0.1">
+                    <input type="number" id="m33" value="1" step="0.1">
+                `;
+                currentMatrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                targetMatrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+            }
+
+            draw();
+            updateMatrixDisplay();
+        }
+
+        function getMatrixFromInputs() {
+            if (mode === '2d') {
+                return [
+                    [parseFloat(document.getElementById('m11').value) || 0,
+                     parseFloat(document.getElementById('m12').value) || 0],
+                    [parseFloat(document.getElementById('m21').value) || 0,
+                     parseFloat(document.getElementById('m22').value) || 0]
+                ];
+            } else {
+                return [
+                    [parseFloat(document.getElementById('m11').value) || 0,
+                     parseFloat(document.getElementById('m12').value) || 0,
+                     parseFloat(document.getElementById('m13').value) || 0],
+                    [parseFloat(document.getElementById('m21').value) || 0,
+                     parseFloat(document.getElementById('m22').value) || 0,
+                     parseFloat(document.getElementById('m23').value) || 0],
+                    [parseFloat(document.getElementById('m31').value) || 0,
+                     parseFloat(document.getElementById('m32').value) || 0,
+                     parseFloat(document.getElementById('m33').value) || 0]
+                ];
+            }
+        }
+
+        function setMatrixInputs(matrix) {
+            if (mode === '2d') {
+                document.getElementById('m11').value = matrix[0][0];
+                document.getElementById('m12').value = matrix[0][1];
+                document.getElementById('m21').value = matrix[1][0];
+                document.getElementById('m22').value = matrix[1][1];
+            } else {
+                document.getElementById('m11').value = matrix[0][0];
+                document.getElementById('m12').value = matrix[0][1];
+                document.getElementById('m13').value = matrix[0][2];
+                document.getElementById('m21').value = matrix[1][0];
+                document.getElementById('m22').value = matrix[1][1];
+                document.getElementById('m23').value = matrix[1][2];
+                document.getElementById('m31').value = matrix[2][0];
+                document.getElementById('m32').value = matrix[2][1];
+                document.getElementById('m33').value = matrix[2][2];
+            }
+        }
+
+        function transform() {
+            if (isAnimating) return;
+
+            targetMatrix = getMatrixFromInputs();
+            animationProgress = 0;
+            isAnimating = true;
+            animate();
+        }
+
+        function reset() {
+            if (isAnimating) return;
+
+            if (mode === '2d') {
+                targetMatrix = [[1, 0], [0, 1]];
+            } else {
+                targetMatrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+            }
+
+            setMatrixInputs(targetMatrix);
+            animationProgress = 0;
+            isAnimating = true;
+            animate();
+        }
+
+        function toggleGrid() {
+            showGrid = !showGrid;
+            draw();
+        }
+
+        function animate() {
+            if (!isAnimating) return;
+
+            animationProgress += 0.02 * animationSpeed;
+
+            if (animationProgress >= 1) {
+                animationProgress = 1;
+                isAnimating = false;
+            }
+
+            // Smooth easing function
+            const t = easeInOutCubic(animationProgress);
+
+            // Interpolate matrix
+            const n = mode === '2d' ? 2 : 3;
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    currentMatrix[i][j] = currentMatrix[i][j] * (1 - t) + targetMatrix[i][j] * t;
+                }
+            }
+
+            draw();
+            updateMatrixDisplay();
+
+            if (isAnimating) {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (mode === '2d') {
+                draw2D();
+            } else {
+                draw3D();
+            }
+        }
+
+        function draw2D() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 40;
+
+            // Draw grid
+            if (showGrid) {
+                // Minor grid lines (every 1 unit) - lighter
+                ctx.strokeStyle = 'rgba(80, 80, 80, 0.12)';
+                ctx.lineWidth = 0.5;
+                for (let i = -20; i <= 20; i++) {
+                    if (i === 0) continue; // Skip axes
+
+                    // Vertical lines (parallel to Y-axis)
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + i * scale, 0);
+                    ctx.lineTo(centerX + i * scale, canvas.height);
+                    ctx.stroke();
+
+                    // Horizontal lines (parallel to X-axis)
+                    ctx.beginPath();
+                    ctx.moveTo(0, centerY + i * scale);
+                    ctx.lineTo(canvas.width, centerY + i * scale);
+                    ctx.stroke();
+                }
+
+                // Major grid lines (every 5 units) - darker and thicker
+                ctx.strokeStyle = 'rgba(150, 150, 150, 0.35)';
+                ctx.lineWidth = 1.5;
+                for (let i = -20; i <= 20; i += 5) {
+                    if (i === 0) continue; // Skip axes
+
+                    // Vertical major lines
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + i * scale, 0);
+                    ctx.lineTo(centerX + i * scale, canvas.height);
+                    ctx.stroke();
+
+                    // Horizontal major lines
+                    ctx.beginPath();
+                    ctx.moveTo(0, centerY + i * scale);
+                    ctx.lineTo(canvas.width, centerY + i * scale);
+                    ctx.stroke();
+                }
+
+                // Draw grid labels (at every integer)
+                ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
+                ctx.font = '11px monospace';
+
+                // X-axis labels
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                for (let i = -10; i <= 10; i++) {
+                    if (i === 0) continue;
+
+                    // Show every unit or every 2 units based on zoom
+                    if (Math.abs(i) <= 10) {
+                        ctx.fillText(i.toString(), centerX + i * scale, centerY + 5);
+                    }
+                }
+
+                // Y-axis labels
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                for (let i = -10; i <= 10; i++) {
+                    if (i === 0) continue;
+
+                    // Show every unit or every 2 units based on zoom
+                    if (Math.abs(i) <= 10) {
+                        ctx.fillText(i.toString(), centerX - 8, centerY - i * scale);
+                    }
+                }
+            }
+
+            // Draw axes
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 3;
+
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.stroke();
+
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+
+            // Draw axis labels
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText('x', canvas.width - 30, centerY + 20);
+            ctx.fillText('y', centerX + 20, 20);
+
+            // Draw origin label
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('0', centerX - 15, centerY + 15);
+
+            // Draw original unit square
+            drawSquare2D(centerX, centerY, scale, [[1, 0], [0, 1]], 'rgba(0, 255, 0, 0.3)', 'rgba(0, 255, 0, 0.8)');
+
+            // Draw transformed square
+            drawSquare2D(centerX, centerY, scale, currentMatrix, 'rgba(100, 150, 255, 0.4)', 'rgba(100, 150, 255, 1)');
+
+            // Draw basis vectors
+            drawVector2D(centerX, centerY, scale, [currentMatrix[0][0], currentMatrix[1][0]], '#ff4444', 'x̂');
+            drawVector2D(centerX, centerY, scale, [currentMatrix[0][1], currentMatrix[1][1]], '#ffaa00', 'ŷ');
+        }
+
+        function drawSquare2D(cx, cy, scale, matrix, fillColor, strokeColor) {
+            const corners = [
+                [0, 0],
+                [1, 0],
+                [1, 1],
+                [0, 1]
+            ];
+
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            corners.forEach((corner, i) => {
+                const x = matrix[0][0] * corner[0] + matrix[0][1] * corner[1];
+                const y = matrix[1][0] * corner[0] + matrix[1][1] * corner[1];
+                const px = cx + x * scale;
+                const py = cy - y * scale;
+
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            });
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawVector2D(cx, cy, scale, vec, color, label) {
+            const x2 = cx + vec[0] * scale;
+            const y2 = cy - vec[1] * scale;
+
+            // Arrow
+            drawArrow(ctx, cx, cy, x2, y2, color, 3);
+
+            // Label
+            ctx.fillStyle = color;
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText(label, x2 + 10, y2);
+        }
+
+        function draw3D() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 60;
+
+            // Draw 3D grid
+            if (showGrid) {
+                draw3DGrid(centerX, centerY, scale);
+            }
+
+            // Draw 3D axes
+            draw3DAxes(centerX, centerY, scale);
+
+            // Draw original unit cube
+            drawCube3D(centerX, centerY, scale, [[1, 0, 0], [0, 1, 0], [0, 0, 1]], 'rgba(0, 255, 0, 0.2)', 'rgba(0, 255, 0, 0.6)');
+
+            // Draw transformed cube
+            drawCube3D(centerX, centerY, scale, currentMatrix, 'rgba(100, 150, 255, 0.3)', 'rgba(100, 150, 255, 0.8)');
+
+            // Draw basis vectors
+            const basis = [
+                [currentMatrix[0][0], currentMatrix[1][0], currentMatrix[2][0]],
+                [currentMatrix[0][1], currentMatrix[1][1], currentMatrix[2][1]],
+                [currentMatrix[0][2], currentMatrix[1][2], currentMatrix[2][2]]
+            ];
+
+            drawVector3D(centerX, centerY, scale, basis[0], '#ff4444', 'x̂');
+            drawVector3D(centerX, centerY, scale, basis[1], '#ffaa00', 'ŷ');
+            drawVector3D(centerX, centerY, scale, basis[2], '#4444ff', 'ẑ');
+        }
+
+        function draw3DGrid(cx, cy, scale) {
+            // Draw grid on XY plane (z=0)
+            ctx.strokeStyle = 'rgba(100, 100, 100, 0.15)';
+            ctx.lineWidth = 1;
+
+            const gridSize = 5;
+            for (let i = -gridSize; i <= gridSize; i++) {
+                // Lines parallel to X axis
+                const p1 = project3D([i, -gridSize, 0], rotationX, rotationY);
+                const p2 = project3D([i, gridSize, 0], rotationX, rotationY);
+
+                ctx.beginPath();
+                ctx.moveTo(cx + p1.x * scale, cy - p1.y * scale);
+                ctx.lineTo(cx + p2.x * scale, cy - p2.y * scale);
+                ctx.stroke();
+
+                // Lines parallel to Y axis
+                const p3 = project3D([-gridSize, i, 0], rotationX, rotationY);
+                const p4 = project3D([gridSize, i, 0], rotationX, rotationY);
+
+                ctx.beginPath();
+                ctx.moveTo(cx + p3.x * scale, cy - p3.y * scale);
+                ctx.lineTo(cx + p4.x * scale, cy - p4.y * scale);
+                ctx.stroke();
+            }
+
+            // Draw grid on XZ plane (y=0)
+            ctx.strokeStyle = 'rgba(100, 100, 100, 0.1)';
+            for (let i = -gridSize; i <= gridSize; i++) {
+                // Lines parallel to X axis
+                const p1 = project3D([i, 0, -gridSize], rotationX, rotationY);
+                const p2 = project3D([i, 0, gridSize], rotationX, rotationY);
+
+                ctx.beginPath();
+                ctx.moveTo(cx + p1.x * scale, cy - p1.y * scale);
+                ctx.lineTo(cx + p2.x * scale, cy - p2.y * scale);
+                ctx.stroke();
+
+                // Lines parallel to Z axis
+                const p3 = project3D([-gridSize, 0, i], rotationX, rotationY);
+                const p4 = project3D([gridSize, 0, i], rotationX, rotationY);
+
+                ctx.beginPath();
+                ctx.moveTo(cx + p3.x * scale, cy - p3.y * scale);
+                ctx.lineTo(cx + p4.x * scale, cy - p4.y * scale);
+                ctx.stroke();
+            }
+
+            // Draw grid on YZ plane (x=0)
+            ctx.strokeStyle = 'rgba(100, 100, 100, 0.1)';
+            for (let i = -gridSize; i <= gridSize; i++) {
+                // Lines parallel to Y axis
+                const p1 = project3D([0, i, -gridSize], rotationX, rotationY);
+                const p2 = project3D([0, i, gridSize], rotationX, rotationY);
+
+                ctx.beginPath();
+                ctx.moveTo(cx + p1.x * scale, cy - p1.y * scale);
+                ctx.lineTo(cx + p2.x * scale, cy - p2.y * scale);
+                ctx.stroke();
+
+                // Lines parallel to Z axis
+                const p3 = project3D([0, -gridSize, i], rotationX, rotationY);
+                const p4 = project3D([0, gridSize, i], rotationX, rotationY);
+
+                ctx.beginPath();
+                ctx.moveTo(cx + p3.x * scale, cy - p3.y * scale);
+                ctx.lineTo(cx + p4.x * scale, cy - p4.y * scale);
+                ctx.stroke();
+            }
+        }
+
+        function draw3DAxes(cx, cy, scale) {
+            const axisLength = 4;
+
+            // X-axis (red)
+            const xStart = project3D([0, 0, 0], rotationX, rotationY);
+            const xEnd = project3D([axisLength, 0, 0], rotationX, rotationY);
+            drawArrow(ctx,
+                cx + xStart.x * scale, cy - xStart.y * scale,
+                cx + xEnd.x * scale, cy - xEnd.y * scale,
+                'rgba(255, 100, 100, 0.6)', 2);
+
+            ctx.fillStyle = 'rgba(255, 100, 100, 0.9)';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText('X', cx + xEnd.x * scale + 10, cy - xEnd.y * scale);
+
+            // Y-axis (green)
+            const yStart = project3D([0, 0, 0], rotationX, rotationY);
+            const yEnd = project3D([0, axisLength, 0], rotationX, rotationY);
+            drawArrow(ctx,
+                cx + yStart.x * scale, cy - yStart.y * scale,
+                cx + yEnd.x * scale, cy - yEnd.y * scale,
+                'rgba(100, 255, 100, 0.6)', 2);
+
+            ctx.fillStyle = 'rgba(100, 255, 100, 0.9)';
+            ctx.fillText('Y', cx + yEnd.x * scale + 10, cy - yEnd.y * scale);
+
+            // Z-axis (blue)
+            const zStart = project3D([0, 0, 0], rotationX, rotationY);
+            const zEnd = project3D([0, 0, axisLength], rotationX, rotationY);
+            drawArrow(ctx,
+                cx + zStart.x * scale, cy - zStart.y * scale,
+                cx + zEnd.x * scale, cy - zEnd.y * scale,
+                'rgba(100, 100, 255, 0.6)', 2);
+
+            ctx.fillStyle = 'rgba(100, 100, 255, 0.9)';
+            ctx.fillText('Z', cx + zEnd.x * scale + 10, cy - zEnd.y * scale);
+
+            // Draw origin
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('O', cx + xStart.x * scale - 15, cy - xStart.y * scale + 15);
+        }
+
+        function drawCube3D(cx, cy, scale, matrix, fillColor, strokeColor) {
+            const corners = [
+                [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
+                [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]
+            ];
+
+            // Transform and project corners
+            const projected = corners.map(corner => {
+                const transformed = [
+                    matrix[0][0] * corner[0] + matrix[0][1] * corner[1] + matrix[0][2] * corner[2],
+                    matrix[1][0] * corner[0] + matrix[1][1] * corner[1] + matrix[1][2] * corner[2],
+                    matrix[2][0] * corner[0] + matrix[2][1] * corner[1] + matrix[2][2] * corner[2]
+                ];
+                return project3D(transformed, rotationX, rotationY);
+            });
+
+            // Draw faces
+            const faces = [
+                [0, 1, 2, 3], // bottom
+                [4, 5, 6, 7], // top
+                [0, 1, 5, 4], // front
+                [2, 3, 7, 6], // back
+                [0, 3, 7, 4], // left
+                [1, 2, 6, 5]  // right
+            ];
+
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+
+            faces.forEach(face => {
+                ctx.beginPath();
+                face.forEach((idx, i) => {
+                    const px = cx + projected[idx].x * scale;
+                    const py = cy - projected[idx].y * scale;
+                    if (i === 0) {
+                        ctx.moveTo(px, py);
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            });
+        }
+
+        function drawVector3D(cx, cy, scale, vec, color, label) {
+            const p1 = project3D([0, 0, 0], rotationX, rotationY);
+            const p2 = project3D(vec, rotationX, rotationY);
+
+            const x1 = cx + p1.x * scale;
+            const y1 = cy - p1.y * scale;
+            const x2 = cx + p2.x * scale;
+            const y2 = cy - p2.y * scale;
+
+            drawArrow(ctx, x1, y1, x2, y2, color, 3);
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText(label, x2 + 10, y2);
+        }
+
+        function project3D(point, rotX, rotY) {
+            // Rotate around X axis
+            let y = point[1] * Math.cos(rotX) - point[2] * Math.sin(rotX);
+            let z = point[1] * Math.sin(rotX) + point[2] * Math.cos(rotX);
+            let x = point[0];
+
+            // Rotate around Y axis
+            const x2 = x * Math.cos(rotY) + z * Math.sin(rotY);
+            z = -x * Math.sin(rotY) + z * Math.cos(rotY);
+
+            // Perspective projection
+            const distance = 4;
+            const scale = distance / (distance + z);
+
+            return {
+                x: x2 * scale,
+                y: y * scale,
+                z: z
+            };
+        }
+
+        function drawArrow(ctx, x1, y1, x2, y2, color, lineWidth) {
+            const headlen = 12;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = lineWidth;
+
+            // Line
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function updateMatrixDisplay() {
+            const matrix = currentMatrix;
+            const n = mode === '2d' ? 2 : 3;
+
+            // Calculate determinant
+            let det;
+            if (mode === '2d') {
+                det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+            } else {
+                det = matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
+                    - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
+                    + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
+            }
+
+            // Update display
+            document.getElementById('detValue').textContent = det.toFixed(3);
+            document.getElementById('scaleValue').textContent = Math.abs(det).toFixed(3) + 'x';
+            document.getElementById('invertibleValue').textContent = Math.abs(det) > 0.001 ? 'Yes ✓' : 'No ✗';
+
+            // Update matrix formula
+            let matrixLatex = '$$\nT = \\begin{bmatrix}\n';
+            for (let i = 0; i < n; i++) {
+                matrixLatex += matrix[i].map(v => v.toFixed(1)).join(' & ');
+                matrixLatex += (i < n - 1) ? ' \\\\\n' : '\n';
+            }
+            matrixLatex += '\\end{bmatrix}\n$$';
+
+            document.getElementById('matrixFormula').innerHTML = '<h3>Matrix Form</h3><div style="text-align: center; font-size: 1.1em;">' + matrixLatex + '</div>';
+
+            // Typeset LaTeX
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([document.getElementById('matrixFormula')]).catch((err) => console.log('MathJax error:', err));
+            }
+
+            // Determine transformation type
+            determineTransformationType(matrix, det);
+        }
+
+        function determineTransformationType(matrix, det) {
+            const n = mode === '2d' ? 2 : 3;
+            let type = 'Custom';
+            let description = 'A custom linear transformation.';
+
+            // Check for identity
+            let isIdentity = true;
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const expected = (i === j) ? 1 : 0;
+                    if (Math.abs(matrix[i][j] - expected) > 0.01) {
+                        isIdentity = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isIdentity) {
+                type = 'Identity';
+                description = 'The <strong>identity matrix</strong> leaves all vectors unchanged.';
+            } else if (Math.abs(det) < 0.001) {
+                type = 'Singular';
+                description = 'A <strong>singular transformation</strong> that collapses space to a lower dimension. This matrix is not invertible.';
+            } else if (mode === '2d') {
+                // Check for rotation
+                const isRotation = Math.abs(Math.abs(det) - 1) < 0.01 &&
+                                 Math.abs(matrix[0][0] - matrix[1][1]) < 0.01 &&
+                                 Math.abs(matrix[0][1] + matrix[1][0]) < 0.01;
+                if (isRotation) {
+                    const angle = Math.atan2(matrix[1][0], matrix[0][0]) * 180 / Math.PI;
+                    type = 'Rotation';
+                    description = `A <strong>rotation</strong> by ${angle.toFixed(1)}° around the origin.`;
+                }
+
+                // Check for scaling
+                const isScaling = Math.abs(matrix[0][1]) < 0.01 && Math.abs(matrix[1][0]) < 0.01;
+                if (isScaling && !isRotation) {
+                    type = 'Scaling';
+                    description = `A <strong>scaling transformation</strong> by factors (${matrix[0][0].toFixed(2)}, ${matrix[1][1].toFixed(2)}).`;
+                }
+            }
+
+            document.getElementById('typeValue').textContent = type;
+            document.getElementById('transformDescription').innerHTML = `<p>${description}</p>`;
+
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([document.getElementById('transformDescription')]).catch((err) => console.log('MathJax error:', err));
+            }
+        }
+
+        function loadPreset(name) {
+            if (isAnimating) return;
+
+            let matrix;
+            if (mode === '2d') {
+                switch(name) {
+                    case 'identity':
+                        matrix = [[1, 0], [0, 1]];
+                        break;
+                    case 'rotation':
+                        const angle = Math.PI / 4; // 45 degrees
+                        matrix = [[Math.cos(angle), -Math.sin(angle)],
+                                 [Math.sin(angle), Math.cos(angle)]];
+                        break;
+                    case 'scale':
+                        matrix = [[2, 0], [0, 2]];
+                        break;
+                    case 'shear':
+                        matrix = [[1, 1], [0, 1]];
+                        break;
+                    case 'reflection':
+                        matrix = [[1, 0], [0, -1]];
+                        break;
+                    case 'projection':
+                        matrix = [[1, 0], [0, 0]];
+                        break;
+                }
+            } else {
+                switch(name) {
+                    case 'identity':
+                        matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                        break;
+                    case 'rotation':
+                        const angle = Math.PI / 4;
+                        matrix = [[Math.cos(angle), -Math.sin(angle), 0],
+                                 [Math.sin(angle), Math.cos(angle), 0],
+                                 [0, 0, 1]];
+                        break;
+                    case 'scale':
+                        matrix = [[2, 0, 0], [0, 2, 0], [0, 0, 2]];
+                        break;
+                    case 'shear':
+                        matrix = [[1, 1, 0], [0, 1, 0], [0, 0, 1]];
+                        break;
+                    case 'reflection':
+                        matrix = [[1, 0, 0], [0, -1, 0], [0, 0, 1]];
+                        break;
+                    case 'projection':
+                        matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 0]];
+                        break;
+                }
+            }
+
+            setMatrixInputs(matrix);
+            targetMatrix = matrix;
+            animationProgress = 0;
+            isAnimating = true;
+            animate();
+        }
+
+        // Mouse controls for 3D rotation
+        function onMouseDown(e) {
+            if (mode !== '3d') return;
+            isDragging = true;
+            canvas.classList.add('dragging');
+            canvas.classList.remove('draggable');
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        }
+
+        function onMouseMove(e) {
+            if (!isDragging || mode !== '3d') return;
+
+            const deltaX = e.clientX - lastMouseX;
+            const deltaY = e.clientY - lastMouseY;
+
+            rotationY += deltaX * 0.01;
+            rotationX += deltaY * 0.01;
+
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+
+            draw();
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            if (mode === '3d') {
+                canvas.classList.remove('dragging');
+                canvas.classList.add('draggable');
+            }
+        }
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', function() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            draw();
+        });
+    </script>
+</body>
+</html>
